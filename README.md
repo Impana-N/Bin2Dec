@@ -2,6 +2,8 @@
 
 A responsive web application that converts binary numbers (base 2) into decimal numbers (base 10) in real time with an interactive mathematical step-by-step breakdown.
 
+🔗 **Live Demo**: [https://bin2dec-nine.vercel.app/](https://bin2dec-nine.vercel.app/)
+
 Built with **HTML5**, **CSS3**, and **vanilla JavaScript** without any external dependencies or frameworks.
 
 ---
