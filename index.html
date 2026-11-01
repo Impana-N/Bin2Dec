@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bin2Dec - Binary to Decimal Converter</title>
+    <meta name="description" content="A modern Binary to Decimal converter built with vanilla HTML, CSS, and JavaScript with instant conversion and mathematical step-by-step breakdown." />
+    <meta property="og:title" content="Bin2Dec - Binary to Decimal Converter" />
+    <meta property="og:description" content="Convert binary numbers to decimal with instant validation and mathematical steps." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <!-- Background visual ambient elements -->
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+    <div class="ambient-grid"></div>
+
+    <div class="app-layout">
+      <!-- Header -->
+      <header class="app-header">
+        <div class="badge-pill">
+          <span class="badge-icon">01</span>
+          <span>Base-2 to Base-10 Converter</span>
+        </div>
+        <h1 class="app-title">Bin2Dec</h1>
+        <p class="app-subtitle">
+          Instantly convert binary numbers (base 2) into decimal numbers (base 10) with manual mathematical computation.
+        </p>
+      </header>
+
+      <!-- Main Card Container -->
+      <main class="converter-card" role="main">
+        <!-- Mode Switcher -->
+        <div class="mode-bar">
+          <span class="mode-label">Input Mode:</span>
+          <div class="mode-options" role="radiogroup" aria-label="Input Length Mode">
+            <button type="button" id="mode8Bit" class="mode-btn active" role="radio" aria-checked="true">
+              <span class="mode-icon">8b</span>
+              8-Bit (Byte)
+            </button>
+            <button type="button" id="modeVariable" class="mode-btn" role="radio" aria-checked="false">
+              <span class="mode-icon">∞</span>
+              Variable Length
+            </button>
+          </div>
+        </div>
+
+        <!-- Binary Input Section -->
+        <div class="field-group">
+          <div class="field-header">
+            <label for="binaryInput" class="field-label">
+              <span class="label-indicator binary-indicator"></span>
+              Binary Input (Base 2)
+            </label>
+            <span id="bitCounter" class="bit-counter">0 / 8 bits</span>
+          </div>
+
+          <div class="input-wrapper" id="inputWrapper">
+            <span class="prefix-tag" aria-hidden="true">0b</span>
+            <input
+              type="text"
+              id="binaryInput"
+              class="field-input monospace"
+              placeholder="e.g. 101101"
+              maxlength="8"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+              spellcheck="false"
+              aria-describedby="errorMessage"
+            />
+            <div class="input-actions">
+              <button type="button" id="pasteBtn" class="icon-btn" title="Paste binary from clipboard" aria-label="Paste binary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                </svg>
+              </button>
+              <button type="button" id="clearInputBtn" class="icon-btn" title="Clear input" aria-label="Clear input">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Error Alert Banner -->
+          <div id="errorMessage" class="error-banner hidden" role="alert" aria-live="polite">
+            <svg class="error-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <div class="error-content">
+              <strong class="error-title">Invalid Binary Digit</strong>
+              <span id="errorText" class="error-desc">Only digits 0 and 1 are allowed in binary notation.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick 0/1 Bit Input Pad -->
+        <div class="bit-pad">
+          <button type="button" id="pad0Btn" class="pad-btn bit-btn" data-key="0">
+            <span class="pad-num">0</span>
+            <span class="pad-sub">Off</span>
+          </button>
+          <button type="button" id="pad1Btn" class="pad-btn bit-btn" data-key="1">
+            <span class="pad-num">1</span>
+            <span class="pad-sub">On</span>
+          </button>
+          <button type="button" id="padBackBtn" class="pad-btn action-pad-btn" title="Backspace">
+            <span class="pad-num">⌫</span>
+            <span class="pad-sub">Del</span>
+          </button>
+          <button type="button" id="invertBtn" class="pad-btn action-pad-btn" title="Invert / NOT bits (0 ⇄ 1)">
+            <span class="pad-num">~</span>
+            <span class="pad-sub">Invert</span>
+          </button>
+        </div>
+
+        <!-- Interactive 8-Bit Register Switch Board -->
+        <div class="register-section" id="registerSection">
+          <div class="register-header">
+            <span class="register-title">8-Bit Visual Register (Click to flip):</span>
+            <span class="register-legend">MSB (Bit 7) ➔ LSB (Bit 0)</span>
+          </div>
+          <div class="bit-board" id="bitBoard">
+            <!-- 8 clickable bit pills generated with power badges -->
+            <button type="button" class="bit-cell" data-bit-pos="7" title="Bit 7 (Value: 128)">
+              <span class="bit-weight">128</span>
+              <span class="bit-val">0</span>
+              <span class="bit-pow">2⁷</span>
+            </button>
+            <button type="button" class="bit-cell" data-bit-pos="6" title="Bit 6 (Value: 64)">
+              <span class="bit-weight">64</span>
+              <span class="bit-val">0</span>
+              <span class="bit-pow">2⁶</span>
+            </button>
+            <button type="button" class="bit-cell" data-bit-pos="5" title="Bit 5 (Value: 32)">
+              <span class="bit-weight">32</span>
+              <span class="bit-val">0</span>
+              <span class="bit-pow">2⁵</span>
+            </button>
+            <button type="button" class="bit-cell" data-bit-pos="4" title="Bit 4 (Value: 16)">
+              <span class="bit-weight">16</span>
+              <span class="bit-val">0</span>
+              <span class="bit-pow">2⁴</span>
+            </button>
+            <button type="button" class="bit-cell" data-bit-pos="3" title="Bit 3 (Value: 8)">
+              <span class="bit-weight">8</span>
+              <span class="bit-val">0</span>
+              <span class="bit-pow">2³</span>
+            </button>
+            <button type="button" class="bit-cell" data-bit-pos="2" title="Bit 2 (Value: 4)">
+              <span class="bit-weight">4</span>
+              <span class="bit-val">0</span>
+              <span class="bit-pow">2²</span>
+            </button>
+            <button type="button" class="bit-cell" data-bit-pos="1" title="Bit 1 (Value: 2)">
+              <span class="bit-weight">2</span>
+              <span class="bit-val">0</span>
+              <span class="bit-pow">2¹</span>
+            </button>
+            <button type="button" class="bit-cell" data-bit-pos="0" title="Bit 0 (Value: 1)">
+              <span class="bit-weight">1</span>
+              <span class="bit-val">0</span>
+              <span class="bit-pow">2⁰</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Transfer Divider -->
+        <div class="divider">
+          <div class="divider-line"></div>
+          <div class="divider-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <polyline points="19 12 12 19 5 12"></polyline>
+            </svg>
+          </div>
+          <div class="divider-line"></div>
+        </div>
+
+        <!-- Decimal Output Section -->
+        <div class="field-group">
+          <div class="field-header">
+            <label for="decimalOutput" class="field-label">
+              <span class="label-indicator decimal-indicator"></span>
+              Decimal Result (Base 10)
+            </label>
+            <span id="conversionStatus" class="status-badge">Waiting for input</span>
+          </div>
+
+          <div class="output-wrapper">
+            <span class="prefix-tag" aria-hidden="true">10#</span>
+            <input
+              type="text"
+              id="decimalOutput"
+              class="field-input monospace readonly-input"
+              placeholder="0"
+              readonly
+              aria-label="Decimal conversion result"
+            />
+            <button type="button" id="copyBtn" class="copy-action-btn" title="Copy decimal result to clipboard">
+              <svg class="copy-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <span id="copyBtnText">Copy</span>
+            </button>
+          </div>
+
+          <!-- Secondary Computer Science formats row (Hex & Octal) -->
+          <div class="meta-row">
+            <div class="meta-badge" title="Hexadecimal format">
+              <span class="meta-key">HEX:</span>
+              <span id="hexValue" class="meta-val monospace">0x0</span>
+            </div>
+            <div class="meta-badge" title="Octal format">
+              <span class="meta-key">OCT:</span>
+              <span id="octValue" class="meta-val monospace">0o0</span>
+            </div>
+            <div class="meta-badge" title="Active bit count">
+              <span class="meta-key">Active Bits:</span>
+              <span id="activeBitsCount" class="meta-val monospace">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Control Action Buttons -->
+        <div class="actions-row">
+          <button type="button" id="clearAllBtn" class="btn btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="1 4 1 10 7 10"></polyline>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+            </svg>
+            Clear All
+          </button>
+          <button type="button" id="randomBtn" class="btn btn-outline" title="Generate random binary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <circle cx="15.5" cy="15.5" r="1.5"></circle>
+            </svg>
+            Random 8-bit
+          </button>
+        </div>
+
+        <!-- Preset Test Cases Section -->
+        <div class="presets-section">
+          <div class="presets-header">
+            <span class="presets-title">Quick Test Cases:</span>
+            <span class="presets-note">Click any sample to load & test</span>
+          </div>
+          <div class="preset-chips" id="presetChips">
+            <button type="button" class="preset-chip" data-test="0">0 <span class="chip-arrow">→</span> 0</button>
+            <button type="button" class="preset-chip" data-test="1">1 <span class="chip-arrow">→</span> 1</button>
+            <button type="button" class="preset-chip" data-test="10">10 <span class="chip-arrow">→</span> 2</button>
+            <button type="button" class="preset-chip" data-test="101">101 <span class="chip-arrow">→</span> 5</button>
+            <button type="button" class="preset-chip" data-test="1011">1011 <span class="chip-arrow">→</span> 11</button>
+            <button type="button" class="preset-chip" data-test="101101">101101 <span class="chip-arrow">→</span> 45</button>
+            <button type="button" class="preset-chip" data-test="11111111">11111111 <span class="chip-arrow">→</span> 255</button>
+            <button type="button" class="preset-chip chip-error-test" data-test="1021">1021 <span class="chip-arrow">→</span> Error test</button>
+          </div>
+        </div>
+
+        <!-- Mathematical Step-by-Step Breakdown -->
+        <section class="breakdown-section" aria-label="Mathematical Step-by-Step Breakdown">
+          <div class="breakdown-header">
+            <div class="breakdown-title-wrapper">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              <h2 class="breakdown-title">Mathematical Calculation Steps</h2>
+            </div>
+            <span class="breakdown-tag">Powers of 2 Formula</span>
+          </div>
+
+          <div class="breakdown-body">
+            <!-- Dynamic calculation content -->
+            <div id="breakdownContent" class="breakdown-content">
+              <p class="breakdown-placeholder">
+                Enter a binary number above to view the exact positional power-of-2 evaluation step by step.
+              </p>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- Educational Info Section -->
+      <footer class="app-footer">
+        <div class="info-card">
+          <h3>How Binary to Decimal Conversion Works</h3>
+          <p>
+            Binary is a base-2 positional numeral system using only digits <strong>0</strong> and <strong>1</strong>.
+            Each position represents a power of 2, starting from the rightmost digit (least significant bit, $2^0 = 1$)
+            and doubling with each step to the left ($2^1 = 2$, $2^2 = 4$, $2^3 = 8$, $2^4 = 16$, $2^5 = 32$, $2^6 = 64$, $2^7 = 128$).
+          </p>
+          <div class="formula-banner">
+            <span class="formula-label">Positional Formula:</span>
+            <code>Decimal = ∑ (Digit × 2ⁿ) where n = position from right (0, 1, 2, ...)</code>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Toast Notification for clipboard feedback -->
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <!-- Pure Vanilla JavaScript -->
+    <script type="module" src="./script.js"></script>
+  </body>
+</html>
